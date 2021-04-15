@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nav_stack/no_animation_delegate.dart';
 
 import 'nav_stack.dart';
 
@@ -10,6 +11,8 @@ class NavStackRouteParser extends RouteInformationParser<String> {
   RouteInformation? restoreRouteInformation(String path) => RouteInformation(location: path);
 }
 
+GlobalKey<NavigatorState> _navKey = GlobalKey();
+
 class NavStackDelegate extends RouterDelegate<String> with ChangeNotifier, PopNavigatorRouterDelegateMixin<String> {
   final NavStackController stackController;
   NavStackDelegate(this.stackController) {
@@ -18,22 +21,31 @@ class NavStackDelegate extends RouterDelegate<String> with ChangeNotifier, PopNa
   }
 
   @override
-  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  GlobalKey<NavigatorState> navigatorKey = _navKey;
 
   @override
   String? get currentConfiguration => stackController.path;
 
+  late String _prevPath = stackController.path;
+
+  /// Returns a Navigator with a single page.
+  /// Wraps the page in a PathStackPathProvider so the top-most PathStack can grab the current route path.
+  /// Calls NavigatorState.widget.stackBuilder to build the page contents.
   @override
   Widget build(BuildContext _) {
+    _recordHistoryEntry(stackController.path);
     return Material(
       child: Navigator(
         key: navigatorKey,
         transitionDelegate: NoAnimationTransitionDelegate(),
         pages: [
-          // StackBuilder is wrapped in a MaterialPage and is the only Page ever in the Navigator
           MaterialPage(
+            // Create a context that can access the Navigator above, so the stackBuilder() delegate can show dialogs, overlays etc
             child: Builder(builder: (context) {
-              return stackController.widget.stackBuilder(context, stackController);
+              return PathStackPathProvider(
+                path: stackController.path,
+                child: stackController.widget.stackBuilder(context, stackController),
+              );
             }),
           ),
         ],
@@ -42,46 +54,24 @@ class NavStackDelegate extends RouterDelegate<String> with ChangeNotifier, PopNa
     );
   }
 
+  // TODO: Should have some support for going up instead of back here. maybe `NavStack.onWillPop(controller)` delegate,
+  //  or should it be on the RouteBuilder instead?
   @override
-  // TODO: Should have some support for going up instead of back here.
-  // NavStack.onPop(controller) maybe?
   Future<bool> popRoute() async => stackController.goBack();
 
   @override
-  Future<void> setNewRoutePath(String path) async {
-    // Update controller which will cause the delegate to rebuilds
-    stackController.path = path;
+  Future<void> setInitialRoutePath(String initialPath) {
+    if (initialPath == "/") initialPath = stackController.widget.initialPath ?? initialPath;
+    return super.setInitialRoutePath(initialPath);
   }
-}
 
-// Boilerplate from here: https://api.flutter.dev/flutter/widgets/TransitionDelegate-class.html
-class NoAnimationTransitionDelegate extends TransitionDelegate<void> {
   @override
-  Iterable<RouteTransitionRecord> resolve({
-    required List<RouteTransitionRecord> newPageRouteHistory,
-    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
-  }) {
-    final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
+  Future<void> setNewRoutePath(String path) async => stackController.path = path;
 
-    for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
-      if (pageRoute.isWaitingForEnteringDecision) {
-        pageRoute.markForAdd();
-      }
-      results.add(pageRoute);
+  void _recordHistoryEntry(String path) {
+    if (path != _prevPath) {
+      stackController.history.add(path);
     }
-    for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
-      if (exitingPageRoute.isWaitingForExitingDecision) {
-        exitingPageRoute.markForRemove();
-        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-        if (pagelessRoutes != null) {
-          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-            pagelessRoute.markForRemove();
-          }
-        }
-      }
-      results.add(exitingPageRoute);
-    }
-    return results;
+    _prevPath = path;
   }
 }

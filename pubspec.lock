@@ -87,7 +87,7 @@ packages:
       name: path_stack
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.2+6"
+    version: "0.1.2"
   path_to_regexp:
     dependency: transitive
     description:

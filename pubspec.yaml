@@ -1,6 +1,6 @@
 name: nav_stack
-description: A simple but powerful path-based navigation router with full web-browser and deeplink support.
-version: 0.0.1
+description: A simple but powerful path-based routing system. Based on MaterialApp.router (Nav 2.0) it has full web-browser and deeplink support.
+version: 0.0.3
 homepage: https://github.com/gskinnerTeam/flutter_nav_stack
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  path_stack: ^0.0.2+6
+  path_stack: ^0.1.2
 
 dev_dependencies:
   flutter_test:

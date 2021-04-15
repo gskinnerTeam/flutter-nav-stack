@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  cached_network_image:
   nav_stack:
     path: ../
   # The following adds the Cupertino Icons font to your application.

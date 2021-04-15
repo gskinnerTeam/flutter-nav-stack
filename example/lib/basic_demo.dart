@@ -7,23 +7,22 @@ class BasicDemo extends StatelessWidget {
   @override
   Widget build(BuildContext _) {
     /// Change this value to test the route guard. When false, you should not be able to access the /in routes.
-    bool isConnected = false;
+    bool isConnected = true;
     return NavStack(
       stackBuilder: (context, controller) {
         return PathStack(
-          path: controller.path,
           scaffoldBuilder: (_, stack) => _MyScaffold(stack),
           routes: {
             ["/login", "/"]: LoginScreen().buildStackRoute(),
             ["/in/"]: PathStack(
-              path: controller.path,
-              basePath: "/in/",
               routes: {
-                ["profile/:id"]: ProfileScreen().buildStackRoute(),
+                ["profile/:profileId"]: StackRouteBuilder(
+                  builder: (_, args) => ProfileScreen(profileId: args["profileId"] ?? ""),
+                ),
                 ["settings"]: SettingsScreen().buildStackRoute(),
               },
             ).buildStackRoute(onBeforeEnter: (_) {
-              if (!isConnected) controller.redirect("/login", () => showAuthWarning(context));
+              if (!isConnected) controller.redirect("/login", onComplete: () => showAuthWarning(context));
               return isConnected; // If we return false, the route will not be entered.
             }),
           },
@@ -72,6 +71,9 @@ class LoginScreen extends StatelessWidget {
 }
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({Key? key, this.profileId = ""}) : super(key: key);
+  final String profileId;
+
   @override
   Widget build(BuildContext context) => Center(child: Text("ProfileScreen"));
 }
