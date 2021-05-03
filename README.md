@@ -21,27 +21,29 @@ import 'package:nav_stack/nav_stack.dart';
 ### Hello NavStack
 `NavStack` wraps `MaterialApp`, so you can include it as the root-element in your App:
 ```dart
-runApp(
-  NavStack(stackBuilder: (_, controller){
-        // Path stack does all the heavy lifting when it comes to arranging our routes
-        // Read more here: https://pub.dev/packages/path_stack#defining-paths
-      return PathStack(
-        routes: {
-          ["/page1"]: Container(color: Colors.red).buildStackRoute(),
-          ["/page2"]: Container(color: Colors.green).buildStackRoute(),
-          // Nesting allows you to type relative paths, and to also wrap sub-sections in their own menus/scaffold
-          ["/page3/"]: PathStack(
-            routes: {
-               // Paths can have multiple entries, allowing aliases,
-               // Using "" alias here allows this route to match "page3/" or "page3/subPage1"
-              ["subPage1", ""]: Container(color: Colors.orange).buildStackRoute(),
-              ["subPage2"]: StackRouteBuilder(builder: (_, __) => Container(color: Colors.purple)), //matches: /page3/subPage2
-            },
-          ).buildStackRoute()});
+void main() {
+  runApp(
+    MaterialApp.router(
+      routeInformationParser: NavStackParser(),
+      routerDelegate: NavStackDelegate(
+        // Declare your full tree of page routes,
+        // PathStack is a component that will automatically figure out what to show for the current navigation path
+        onGenerateStack: (context, nav) => PathStack(
+          routes: {
+            ["/"]: HomeScreen().toStackRoute(),
+            ["/messages"]: MessagesScreen().toStackRoute(),
+            ["/profile"]: ProfileScreen().toStackRoute(),
+          },
+        ),
+      ),
+    ),
+  );
 }
-}));
-...
-// Change path using a simple api:
+```
+
+Change path using a simple api:
+
+```dart
 void showPage1() => NavStack.of(context).path = "/page1";
 void showSubPage2() => NavStack.of(context).path = "/page3/subPage2";
 ```
