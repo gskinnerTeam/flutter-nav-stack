@@ -15,13 +15,12 @@ class AdvancedTabsDemo extends StatelessWidget {
             routes: {
               [AppPaths.tabsCategory]: PathStack(
                 // Main scaffold is wrapped here
-                scaffoldBuilder: (context, stack) => SafeArea(
-                    child: MainScaffold(
+                scaffoldBuilder: (context, stack) => MainScaffold(
                   child: stack,
                   currentPath: NavStack.of(context).path,
                   // Goto /compose when this is pressed
                   onComposePressed: _handleComposePressed,
-                )),
+                ),
                 transitionBuilder: (_, stack, animation) =>
                     FadeTransition(opacity: animation, child: stack),
                 routes: {
