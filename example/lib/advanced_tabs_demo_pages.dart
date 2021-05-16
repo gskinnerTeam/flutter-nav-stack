@@ -43,7 +43,8 @@ class _SomeStatefulPageState extends State<SomeStatefulPage> {
     if (items == null) return Center(child: CircularProgressIndicator());
     // Filter Items
     final filteredItems = List.from(items!)
-      ..removeWhere((name) => name.toLowerCase().contains(_filter.toLowerCase()) == false);
+      ..removeWhere((name) =>
+          name.toLowerCase().contains(_filter.toLowerCase()) == false);
     return Column(
       children: [
         Row(
@@ -72,14 +73,16 @@ class _SomeStatefulPageState extends State<SomeStatefulPage> {
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(8.0),
-                      color: (index % 2 == 0 ? Colors.grey : Colors.white).withOpacity(.1),
+                      color: (index % 2 == 0 ? Colors.grey : Colors.white)
+                          .withOpacity(.1),
                       child: Row(
                         children: [
                           SizedBox(
                               width: 100,
                               height: 100,
                               child: CachedNetworkImage(
-                                  imageUrl: "https://source.unsplash.com/random/50x50?id=${widget.title}$index")),
+                                  imageUrl:
+                                      "https://source.unsplash.com/random/50x50?id=${widget.title}$index")),
                           Text(filteredItems[index]),
                         ],
                       ),
@@ -134,7 +137,8 @@ class ComposePage extends StatefulWidget {
 class _ComposePageState extends State<ComposePage> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SafeArea(
+        child: Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,13 +151,15 @@ class _ComposePageState extends State<ComposePage> {
               Text("New Message:", style: TextStyle(fontSize: 32)),
               TextField(
                   maxLines: 10,
-                  decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)))),
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black)))),
               Spacer(flex: 3),
             ],
           ))
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -174,7 +180,8 @@ class _DetailsPageState extends State<DetailsPage> {
   List<String> items = List.generate(100, (index) => "$index");
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SafeArea(
+        child: Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
@@ -193,7 +200,7 @@ class _DetailsPageState extends State<DetailsPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   String getId(int dir) {
