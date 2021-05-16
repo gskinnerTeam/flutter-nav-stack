@@ -15,40 +15,49 @@ class AdvancedTabsDemo extends StatelessWidget {
             routes: {
               [AppPaths.tabsCategory]: PathStack(
                 // Main scaffold is wrapped here
-                scaffoldBuilder: (_, stack) => MainScaffold(
+                scaffoldBuilder: (context, stack) => SafeArea(
+                    child: MainScaffold(
                   child: stack,
                   currentPath: NavStack.of(context).path,
                   // Goto /compose when this is pressed
                   onComposePressed: _handleComposePressed,
-                ),
-                transitionBuilder: (_, stack, animation) => FadeTransition(opacity: animation, child: stack),
+                )),
+                transitionBuilder: (_, stack, animation) =>
+                    FadeTransition(opacity: animation, child: stack),
                 routes: {
                   // Home
                   [HomePage.path]: HomePage("").buildStackRoute(),
                   // Settings
                   [AppPaths.settings]: PathStack(
                     // Settings scaffold is wrapped here
-                    scaffoldBuilder: (_, child) => SettingsScaffold(child: child),
+                    scaffoldBuilder: (_, child) =>
+                        SettingsScaffold(child: child),
                     routes: {
-                      [ProfileSettings.path]: ProfileSettings("").buildStackRoute(),
+                      [ProfileSettings.path]:
+                          ProfileSettings("").buildStackRoute(),
                       [AlertSettings.path]: AlertSettings("").buildStackRoute(),
-                      [BillingSettings.path]: BillingSettings("").buildStackRoute(maintainState: false),
+                      [BillingSettings.path]: BillingSettings("")
+                          .buildStackRoute(maintainState: false),
                     },
                   ).buildStackRoute(),
                   // Inbox
                   [AppPaths.inbox]: PathStack(
                     scaffoldBuilder: (_, child) => InboxScaffold(child: child),
                     routes: {
-                      [InboxPage.friendsPath]: InboxPage(InboxType.friends).buildStackRoute(),
-                      [InboxPage.unreadPath]: InboxPage(InboxType.unread).buildStackRoute(),
-                      [InboxPage.archivedPath]: InboxPage(InboxType.archived).buildStackRoute(),
+                      [InboxPage.friendsPath]:
+                          InboxPage(InboxType.friends).buildStackRoute(),
+                      [InboxPage.unreadPath]:
+                          InboxPage(InboxType.unread).buildStackRoute(),
+                      [InboxPage.archivedPath]:
+                          InboxPage(InboxType.archived).buildStackRoute(),
                     },
                   ).buildStackRoute(),
                 },
               ).buildStackRoute(),
 
               /// Non stateful full-screen route
-              [ComposePage.path]: ComposePage().buildStackRoute(maintainState: false),
+              [ComposePage.path]:
+                  ComposePage().buildStackRoute(maintainState: false),
 
               /// Inject itemId param into detailsView
               [DetailsPage.path + ":id"]: StackRouteBuilder(
