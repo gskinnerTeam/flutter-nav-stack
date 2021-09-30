@@ -22,7 +22,13 @@ TODO:
  */
 
 class NavStack extends StatefulWidget {
-  const NavStack({Key? key, this.onPathChanging, this.appBuilder, required this.stackBuilder, this.initialPath})
+  const NavStack(
+      {Key? key,
+      this.onPathChanging,
+      this.appBuilder,
+      required this.stackBuilder,
+      this.initialPath,
+      this.onUnknownPath})
       : super(key: key);
 
   /// Called whenever the current path has changed
@@ -31,18 +37,24 @@ class NavStack extends StatefulWidget {
   /// Determines what the initial path should be (if the OS has not provided one)
   final String? initialPath;
 
+  ///Use to handle 404 page not found
+  final String? onUnknownPath;
+
   /// Caller should invoke MaterialApp.router, and use the provided delegate & router, adding any
   /// other custom options they need to the MaterialApp.
-  final MaterialApp Function(RouterDelegate<String> delegate, RouteInformationParser<String> parser)? appBuilder;
+  final MaterialApp Function(RouterDelegate<String> delegate,
+      RouteInformationParser<String> parser)? appBuilder;
 
   /// Must return a PathStack widget
-  final PathStack Function(BuildContext context, NavStackController controller) stackBuilder;
+  final PathStack Function(BuildContext context, NavStackController controller)
+      stackBuilder;
 
   @override
   NavStackController createState() => NavStackController();
 
   static NavStackController of(BuildContext context) =>
-      (context.dependOnInheritedWidgetOfExactType<_InheritedNavStackController>() as _InheritedNavStackController)
+      (context.dependOnInheritedWidgetOfExactType<
+              _InheritedNavStackController>() as _InheritedNavStackController)
           .state;
 }
 
@@ -71,7 +83,8 @@ class NavStackController extends State<NavStack> with ChangeNotifier {
       // Returns a MaterialApp, with the Delegate as the top level component.
       // The Delegate will call the widget.stackBuilder() inside of the Navigator
       child: widget.appBuilder?.call(_delegate, _parser) ??
-          MaterialApp.router(routeInformationParser: _parser, routerDelegate: _delegate),
+          MaterialApp.router(
+              routeInformationParser: _parser, routerDelegate: _delegate),
     );
   }
 
@@ -79,7 +92,9 @@ class NavStackController extends State<NavStack> with ChangeNotifier {
   bool goBack() {
     if (history.length > 1) {
       String prevPath = history[history.length - 2];
-      history..removeLast()..removeLast(); // remove last 2 history entries
+      history
+        ..removeLast()
+        ..removeLast(); // remove last 2 history entries
       path = prevPath; // switch, adding a new history entry
       return true;
     }
@@ -89,8 +104,10 @@ class NavStackController extends State<NavStack> with ChangeNotifier {
   /// Go back in history and grab the first route that does not match the provided route.
   /// Used in this demo to close all of the details pages you might have in your history stack
   void popMatching(String value, {bool exactMatch = false}) {
-    int index = history.lastIndexWhere((element) => exactMatch ? element != value : element.contains(value) == false);
-    List<String> newHistory = List.from(history)..removeRange(index + 1, history.length);
+    int index = history.lastIndexWhere((element) =>
+        exactMatch ? element != value : element.contains(value) == false);
+    List<String> newHistory = List.from(history)
+      ..removeRange(index + 1, history.length);
     path = newHistory.last;
     //TODO: Is it an issue that routeChanged handlers will fire before history stack is finalized? Would it be better to have something like ignoreNext?
     history = newHistory;
@@ -98,8 +115,10 @@ class NavStackController extends State<NavStack> with ChangeNotifier {
 
   /// Pop all pages until we find a match
   void popUntil(String value, {bool exactMatch = false}) {
-    int index = history.lastIndexWhere((element) => exactMatch ? element == value : element.contains(value));
-    List<String> newHistory = List.from(history)..removeRange(index + 1, history.length);
+    int index = history.lastIndexWhere(
+        (element) => exactMatch ? element == value : element.contains(value));
+    List<String> newHistory = List.from(history)
+      ..removeRange(index + 1, history.length);
     path = newHistory.last;
     history = newHistory;
   }
@@ -115,14 +134,17 @@ class NavStackController extends State<NavStack> with ChangeNotifier {
 
   /// Meant to be used from with [onBeforeUpdate] inside of [StackRouteBuilder],
   /// Changes path in the next frame to avoid errors when building mid-build.
-  void redirect(String path, {VoidCallback? onComplete}) async => scheduleMicrotask(() {
+  void redirect(String path, {VoidCallback? onComplete}) async =>
+      scheduleMicrotask(() {
         this.path = path;
         onComplete?.call();
       });
 }
 
 class _InheritedNavStackController extends InheritedWidget {
-  _InheritedNavStackController({Key? key, required Widget child, required this.state}) : super(key: key, child: child);
+  _InheritedNavStackController(
+      {Key? key, required Widget child, required this.state})
+      : super(key: key, child: child);
   final NavStackController state;
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;

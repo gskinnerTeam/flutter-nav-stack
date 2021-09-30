@@ -5,15 +5,19 @@ import 'nav_stack.dart';
 
 class NavStackRouteParser extends RouteInformationParser<String> {
   @override
-  Future<String> parseRouteInformation(RouteInformation routeInformation) async => routeInformation.location ?? "";
+  Future<String> parseRouteInformation(
+          RouteInformation routeInformation) async =>
+      routeInformation.location ?? "";
 
   @override
-  RouteInformation? restoreRouteInformation(String path) => RouteInformation(location: path);
+  RouteInformation? restoreRouteInformation(String path) =>
+      RouteInformation(location: path);
 }
 
 GlobalKey<NavigatorState> _navKey = GlobalKey();
 
-class NavStackDelegate extends RouterDelegate<String> with ChangeNotifier, PopNavigatorRouterDelegateMixin<String> {
+class NavStackDelegate extends RouterDelegate<String>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<String> {
   final NavStackController stackController;
   NavStackDelegate(this.stackController) {
     // When controller changes it's value, this will trigger a rebuild
@@ -44,7 +48,10 @@ class NavStackDelegate extends RouterDelegate<String> with ChangeNotifier, PopNa
             child: Builder(builder: (context) {
               return PathStackPathProvider(
                 path: stackController.path,
-                child: stackController.widget.stackBuilder(context, stackController),
+                //Added in PathStack
+                unknownPath: stackController.widget.onUnknownPath ?? "",
+                child: stackController.widget
+                    .stackBuilder(context, stackController),
               );
             }),
           ),
@@ -61,12 +68,14 @@ class NavStackDelegate extends RouterDelegate<String> with ChangeNotifier, PopNa
 
   @override
   Future<void> setInitialRoutePath(String initialPath) {
-    if (initialPath == "/") initialPath = stackController.widget.initialPath ?? initialPath;
+    if (initialPath == "/")
+      initialPath = stackController.widget.initialPath ?? initialPath;
     return super.setInitialRoutePath(initialPath);
   }
 
   @override
-  Future<void> setNewRoutePath(String path) async => stackController.path = path;
+  Future<void> setNewRoutePath(String path) async =>
+      stackController.path = path;
 
   void _recordHistoryEntry(String path) {
     if (path != _prevPath) {
